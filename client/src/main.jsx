@@ -9,9 +9,7 @@ import ThemeProvider from "./components/ThemeProvider.jsx";
 createRoot(document.getElementById("root")).render(
   <PersistGate persistor={persistor}>
     <Provider store={store}>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+      <App />
     </Provider>
   </PersistGate>
 );
