@@ -10,7 +10,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import {
   updateStart,
@@ -29,7 +29,7 @@ import { HiExclamationCircle } from "react-icons/hi";
 
 const DashProfile = () => {
   const navigate = useNavigate();
-  const { currentUser, error } = useSelector((state) => state.user);
+  const { currentUser, error, loading } = useSelector((state) => state.user);
   const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [formData, setFormData] = useState({});
@@ -169,10 +169,21 @@ const DashProfile = () => {
         <Button
           className="bg-gradient-to-br from-purple-600 to-blue-500 text-white hover:bg-gradient-to-bl focus:ring-blue-300 dark:focus:ring-blue-800"
           type="submit"
+          disabled={loading}
           outline
         >
-          Update
+          {loading ? "Loading..." : "update"}
         </Button>
+        {currentUser.isAdmin && (
+          <Link to={"/create-post"}>
+            <Button
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:bg-gradient-to-l focus:ring-purple-200 w-full dark:focus:ring-purple-800"
+              type="button"
+            >
+              Create A Post
+            </Button>
+          </Link>
+        )}
       </form>
       <div className="text-red-500 flex justify-between mt-5">
         <span onClick={() => setShowModal(true)} className="cursor-pointer">
