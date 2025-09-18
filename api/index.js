@@ -5,6 +5,9 @@ import userRoutes from "./routes/user.route.js";
 import authRoutes from "./routes/auth.route.js";
 import postRoutes from "./routes/post.route.js";
 import cookieParser from "cookie-parser";
+import multer from "multer"
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
 
 dotenv.config();
 
@@ -18,6 +21,7 @@ mongoose
   });
 
 const app = express();
+const upload = multer({ dest: "uploads/" });
 
 app.use(express.json());
 app.use(cookieParser());
@@ -26,6 +30,13 @@ let PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+cloudinary.config({
+  cloud_name: "dwypdpzuc",
+  api_key: "834853458957571",
+  api_secret: "5g1_PHJYG9hpCno1R4rtKWM6unY",
+});
+
 
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);

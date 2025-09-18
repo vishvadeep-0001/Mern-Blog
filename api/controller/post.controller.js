@@ -1,5 +1,7 @@
 import Post from "../models/post.model.js";
 import { errorHandler } from "../utils/error.js";
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
 
 export const create = async (req, res, next) => {
   if (!req.user.isAdmin) {
@@ -13,10 +15,21 @@ export const create = async (req, res, next) => {
     .join("-")
     .toLowerCase()
     .replace(/[^a-zA-Z0-9-]/g, "-");
-  const newPost = new Post({
+
+  let imageUrl = "";
+
+  if(req.file){
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "blog_images",
+    })
+    imageUrl = result.secure_url;
+    fs.unlinkSync(req.file.path)
+  }
+    const newPost = new Post({
     ...req.body,
     slug,
     userId: req.user.id,
+    image: imageUrl,
   });
   try {
     const savedPost = await newPost.save();
