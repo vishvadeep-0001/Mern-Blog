@@ -1,3 +1,4 @@
+import { title } from "process";
 import Post from "../models/post.model.js";
 import { errorHandler } from "../utils/error.js";
 import { v2 as cloudinary } from "cloudinary";
@@ -18,14 +19,14 @@ export const create = async (req, res, next) => {
 
   let imageUrl = "";
 
-  if(req.file){
+  if (req.file) {
     const result = await cloudinary.uploader.upload(req.file.path, {
       folder: "blog_images",
-    })
+    });
     imageUrl = result.secure_url;
-    fs.unlinkSync(req.file.path)
+    fs.unlinkSync(req.file.path);
   }
-    const newPost = new Post({
+  const newPost = new Post({
     ...req.body,
     slug,
     userId: req.user.id,
@@ -34,6 +35,52 @@ export const create = async (req, res, next) => {
   try {
     const savedPost = await newPost.save();
     res.status(201).json(savedPost);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPosts = async (req, res, next) => {
+  try {
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    const limit = parseInt(req.query.limit) || 9;
+    const sortDirection = req.query.order === "asc" ? 1 : -1;
+    
+    const posts = await Post.find({
+      ...(req.query.userId && { userId: req.query.userId }),
+      ...(req.query.category && { userId: req.query.category }),
+      ...(req.query.slug && { userId: req.query.slug }),
+      ...(req.query.postId && { _id: req.query.postId }),
+      ...(req.query.searchTerm && {
+        $or: [
+          { title: { $regex: req.query.searchTerm, $options: "i" } },
+          {
+            content: { $regex: req.query.searchTerm, $options: "i" },
+          },
+        ],
+      }),
+    })
+      .sort({
+        updatedAt: sortDirection,
+      })
+      .skip(startIndex)
+      .limit(limit);
+    const totalPosts = await Post.countDocuments();
+
+    const now = new Date();
+    const oneMonthAgo = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const lastMonthPosts = await Post.countDocuments({
+      createdAt: { $gte: oneMonthAgo },
+    });
+    res.status(200).json({
+      posts,
+      totalPosts,
+      lastMonthPosts,
+    });
   } catch (error) {
     next(error);
   }
