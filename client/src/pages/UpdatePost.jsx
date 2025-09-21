@@ -1,41 +1,71 @@
 import { FileInput, Select, TextInput, Button, Alert } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-const CreatePost = () => {
+const UpdatePost = () => {
   const [formData, setFormData] = useState({});
-  const [publishError, setPublishError] = useState();
+  const [updateError, setUpdateError] = useState();
   const navigate = useNavigate();
+  const { postId } = useParams();
+  const { currentUser } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    try {
+      const fetchPost = async () => {
+        const res = await fetch(`/api/post/getposts?postId=${postId}`);
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.log(data.message);
+          setUpdateError(data.message);
+          return;
+        }
+        if (res.ok) {
+          setUpdateError(null);
+          setFormData(data.posts[0]);
+        }
+      };
+      fetchPost();
+    } catch (error) {
+      console.log(error.message);
+    }
+  }, [postId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/post/create", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `/api/post/updatepost/${postId}/${currentUser._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
       const data = await res.json();
       if (!res.ok) {
-        setPublishError(data.message);
+        setUpdateError(data.message);
         return;
       }
-      console.log(data.slug);
+
       if (res.ok) {
-        setPublishError(null);
+        setUpdateError(null);
         navigate(`/dashboard?tab=posts`);
       }
     } catch (error) {
-      setPublishError("Something went wrong !");
+      setUpdateError("Something went wrong !");
     }
   };
+
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
-      <h1 className="text-center text-3xl my-7 font-semibold">Create a post</h1>
+      <h1 className="text-center text-3xl my-7 font-semibold">Update Post</h1>
       <form action="" className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 sm:flex-row justify-between">
           <TextInput
@@ -43,6 +73,7 @@ const CreatePost = () => {
             placeholder="Title"
             required
             id="title"
+            value={formData.title}
             className="flex-1"
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
@@ -52,6 +83,7 @@ const CreatePost = () => {
             onChange={(e) =>
               setFormData({ ...formData, category: e.target.value })
             }
+            value={formData.category}
           >
             <option value="uncategorized">Select a category</option>
             <option value="javascript">Javascript</option>
@@ -71,17 +103,18 @@ const CreatePost = () => {
         </div>
         <ReactQuill
           theme="snow"
+          value={formData.content}
           placeholder="Write Something..."
           className="h-72 mb-12"
           required
           onChange={(value) => setFormData({ ...formData, content: value })}
         />
         <Button type="submit" color="purple">
-          Publish
+          Update
         </Button>
-        {publishError && (
+        {updateError && (
           <Alert className="mt-3" color="failure">
-            {publishError}
+            {updateError}
           </Alert>
         )}
       </form>
@@ -89,4 +122,4 @@ const CreatePost = () => {
   );
 };
 
-export default CreatePost;
+export default UpdatePost;
