@@ -49,7 +49,7 @@ export const getPosts = async (req, res, next) => {
     const posts = await Post.find({
       ...(req.query.userId && { userId: req.query.userId }),
       ...(req.query.category && { userId: req.query.category }),
-      ...(req.query.slug && { userId: req.query.slug }),
+      ...(req.query.slug && { slug: req.query.slug }),
       ...(req.query.postId && { _id: req.query.postId }),
       ...(req.query.searchTerm && {
         $or: [
@@ -103,7 +103,7 @@ export const updatePost = async (req, res, next) => {
   if (!req.user.isAdmin || req.user.id !== req.params.userId) {
     return next(errorHandler(403, "you are not alowed to update this post !"));
   }
-  try { 
+  try {
     const updatePost = await Post.findByIdAndUpdate(
       req.params.postId,
       {
