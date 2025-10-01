@@ -31,7 +31,7 @@ const CommentSection = ({ postId }) => {
       });
 
       const data = await res.json();
-      console.log(data);
+
       if (res.ok) {
         setComment("");
         setCommentError(null);
@@ -84,6 +84,15 @@ const CommentSection = ({ postId }) => {
       console.log(error);
     }
   };
+
+  const handleEdit = async (comment, editedContent) => {
+    setComments(
+      comments.map((c) => {
+        c._id === comment._id ? { ...c, content: editedContent } : c;
+      })
+    );
+  };
+
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {currentUser ? (
@@ -149,7 +158,12 @@ const CommentSection = ({ postId }) => {
           </div>
 
           {comments.map((com) => (
-            <CommentCom key={com._id} com={com} onLike={handleLike} />
+            <CommentCom
+              key={com._id}
+              com={com}
+              onLike={handleLike}
+              onEdit={handleEdit}
+            />
           ))}
         </>
       )}

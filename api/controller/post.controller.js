@@ -1,4 +1,3 @@
-import { title } from "process";
 import Post from "../models/post.model.js";
 import { errorHandler } from "../utils/error.js";
 import { v2 as cloudinary } from "cloudinary";
