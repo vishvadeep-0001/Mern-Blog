@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { FaThumbsUp } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
-const CommentCom = ({ com }) => {
+const CommentCom = ({ com, onLike }) => {
   const [user, setUser] = useState({});
+  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     const getUser = async () => {
@@ -26,7 +29,6 @@ const CommentCom = ({ com }) => {
           className="w-10 h-10 rounded-full bg-gray-200"
           src={user.profilePicture}
           alt={user.username}
-          srcset=""
         />
       </div>
       <div className="flex-1">
@@ -39,6 +41,27 @@ const CommentCom = ({ com }) => {
           </span>
         </div>
         <p className="text-gray-500 pb-2">{com.content}</p>
+        <div className="flex items-center pt-2 text-xs max-w-fit gap-2">
+          <button
+            type="button"
+            onClick={() => onLike(com._id)}
+            className={`text-gray-400 hover:text-blue-500
+              ${
+                currentUser &&
+                com.likes.includes(currentUser._id) &&
+                "!text-blue-500"
+              }
+              `}
+          >
+            <FaThumbsUp className="text-sm" />
+          </button>
+          <p className="text-gray-400">
+            {com.numberOfLikes > 0 &&
+              com.numberOfLikes +
+                " " +
+                (com.numberOfLikes === 1 ? "Like" : "Likes")}
+          </p>
+        </div>
       </div>
     </div>
   );
