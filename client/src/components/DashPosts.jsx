@@ -12,7 +12,7 @@ import {
   TableHeadCell,
   TableRow,
 } from "flowbite-react";
-import { Link, UNSAFE_FetchersContext } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { HiExclamationCircle } from "react-icons/hi";
 
 const DashPosts = () => {
